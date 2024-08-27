@@ -8,7 +8,7 @@ const App = () => {
     const [images, setImages] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [quote, setQuote] = useState('');
-    const [generatedQuote, setGeneratedQuote] = useState(''); // New state for the generated quote
+    const [generatedQuote, setGeneratedQuote] = useState('');
 
     const handleSearch = async (query) => {
         setQuote(query);
@@ -28,10 +28,10 @@ const App = () => {
     const handleGenerateRandomQuote = async () => {
         try {
             const response = await axios.get('https://api.api-ninjas.com/v1/quotes', {
-                headers: { 'X-Api-Key': 'WIDogwrp/Kfc3ELin0zpLg==uPeHtjJU6R6Z3X0Q' }, // Replace with your API key
+                headers: { 'X-Api-Key': 'WIDogwrp/Kfc3ELin0zpLg==uPeHtjJU6R6Z3X0Q' },
             });
-            const randomQuote = response.data[0].quote; // Adjust based on API response structure
-            setGeneratedQuote(randomQuote); // Update the state with the generated quote
+            const randomQuote = response.data[0].quote;
+            setGeneratedQuote(randomQuote);
             setQuote(randomQuote);
             handleSearch(randomQuote);
         } catch (error) {
@@ -40,9 +40,8 @@ const App = () => {
     };
 
     const handleImageClick = (image) => {
-        // Set the selected image and quote, so ImageModal can use them
         setSelectedImage(image);
-        setQuote(quote); // Make sure to use the correct quote
+        setQuote(quote);
     };
 
     const handleCloseModal = () => {
@@ -50,20 +49,22 @@ const App = () => {
     };
 
     return (
-        <div>
-            <SearchBar
-                onSearch={handleSearch}
-                onGenerateRandomQuote={handleGenerateRandomQuote} // Pass the function to SearchBar
-            />
-            {generatedQuote && (
-                <div style={{ margin: '10px 0', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
-                    <strong>Generated Quote:</strong> {generatedQuote}
-                </div>
-            )}
-            <ImageGrid images={images} onImageClick={handleImageClick} />
-            {selectedImage && (
-                <ImageModal image={selectedImage} quote={quote} onClose={handleCloseModal} />
-            )}
+        <div className="min-h-screen bg-gray-100">
+            <div className="container mx-auto p-4">
+                <SearchBar
+                    onSearch={handleSearch}
+                    onGenerateRandomQuote={handleGenerateRandomQuote}
+                />
+                {generatedQuote && (
+                    <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-white shadow-md">
+                        <strong className="text-lg">Generated Quote:</strong> {generatedQuote}
+                    </div>
+                )}
+                <ImageGrid images={images} onImageClick={handleImageClick} />
+                {selectedImage && (
+                    <ImageModal image={selectedImage} quote={quote} onClose={handleCloseModal} />
+                )}
+            </div>
         </div>
     );
 };
