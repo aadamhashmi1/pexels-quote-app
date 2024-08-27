@@ -2,8 +2,16 @@ import React, { useEffect } from 'react';
 
 const ImageModal = ({ image, quote, onClose }) => {
     useEffect(() => {
+        let newWindow = null;
+        
         const openImageWithTextInNewTab = () => {
-            const newWindow = window.open('', '_blank');
+            if (newWindow && !newWindow.closed) {
+                // If a window is already open, focus it
+                newWindow.focus();
+                return;
+            }
+
+            newWindow = window.open('', '_blank');
             const htmlContent = `
                 <!DOCTYPE html>
                 <html>
@@ -36,9 +44,22 @@ const ImageModal = ({ image, quote, onClose }) => {
                             padding: 10px;
                             cursor: pointer;
                             margin-right: 10px;
-                            border-radius: 0.375rem;
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                            font-size: 1rem;
+                        }
+                        .spinner {
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            border: 4px solid rgba(0, 0, 0, 0.1);
+                            border-left: 4px solid #fff;
+                            border-radius: 50%;
+                            width: 40px;
+                            height: 40px;
+                            animation: spin 1s linear infinite;
+                        }
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
                         }
                     </style>
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
@@ -49,11 +70,17 @@ const ImageModal = ({ image, quote, onClose }) => {
                         <button class="button" id="downloadBtn">Download</button>
                         <button class="button" id="closeBtn">Close</button>
                     </div>
+                    <div class="spinner" id="spinner"></div>
                     <script>
                         const canvas = new fabric.Canvas('canvas');
+                        const spinner = document.getElementById('spinner');
+
                         fabric.Image.fromURL('${image.src.large}', (img) => {
                             const imgWidth = img.width;
                             const imgHeight = img.height;
+
+                            // Hide the spinner when image is loaded
+                            spinner.style.display = 'none';
 
                             // Set canvas size
                             canvas.setWidth(imgWidth);
@@ -91,6 +118,7 @@ const ImageModal = ({ image, quote, onClose }) => {
 
                             canvas.add(text);
 
+                            // Adjust text position to ensure it is within image bounds
                             const adjustTextPosition = () => {
                                 const textWidth = text.width;
                                 const textHeight = text.height;
@@ -100,6 +128,7 @@ const ImageModal = ({ image, quote, onClose }) => {
                                     top: Math.min(Math.max(text.top, textHeight / 2), imgHeight - textHeight / 2),
                                 });
 
+                                // Ensure text is contained within the image
                                 text.set({
                                     left: Math.max(text.left, textWidth / 2),
                                     top: Math.max(text.top, textHeight / 2),
@@ -110,6 +139,7 @@ const ImageModal = ({ image, quote, onClose }) => {
 
                             adjustTextPosition();
 
+                            // Optional: Adjust fontSize to fit text within the image if needed
                             const adjustFontSize = () => {
                                 while (text.width > imgWidth * 0.9 || text.height > imgHeight * 0.9) {
                                     const currentFontSize = text.fontSize;
@@ -121,6 +151,7 @@ const ImageModal = ({ image, quote, onClose }) => {
                             adjustFontSize();
                             canvas.setActiveObject(text);
 
+                            // Download button functionality
                             document.getElementById('downloadBtn').addEventListener('click', () => {
                                 const dataURL = canvas.toDataURL({
                                     format: 'png',
@@ -132,6 +163,7 @@ const ImageModal = ({ image, quote, onClose }) => {
                                 link.click();
                             });
 
+                            // Close button functionality
                             document.getElementById('closeBtn').addEventListener('click', () => {
                                 window.close();
                             });
@@ -150,18 +182,24 @@ const ImageModal = ({ image, quote, onClose }) => {
             newWindow.document.close();
         };
 
+        // Open image with text in new tab when component mounts
         openImageWithTextInNewTab();
 
+        // Cleanup on component unmount
         return () => {
-            // Cleanup
+            if (newWindow && !newWindow.closed) {
+                newWindow.close();
+            }
         };
     }, [image, quote]);
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center overflow-auto">
+        <div
+            className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center overflow-auto"
+        >
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 bg-white text-gray-800 border-none px-4 py-2 rounded-lg shadow-md text-lg hover:bg-gray-200"
+                className="absolute top-4 right-4 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
             >
                 Close
             </button>
