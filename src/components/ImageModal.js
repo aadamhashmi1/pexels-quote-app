@@ -54,20 +54,20 @@ const ImageModal = ({ image, quote, onClose }) => {
 
                             canvas.add(img);
 
-                            const text = new fabric.Textbox('${quote}', {
-                                left: imgWidth / 2,
-                                top: imgHeight / 2,
-                                width: imgWidth * 0.9, // Set a width for the text box to wrap the text
-                                fontSize: 40,
-                                fill: '#ffffff',
-                                originX: 'center',
-                                originY: 'center',
-                                textAlign: 'center',
-                                editable: true, // Allow text manipulation
-                                hasControls: true, // Allow text controls
-                                hasBorders: true,
-                                
-                            });
+                            const text = new fabric.Textbox('${quote.toUpperCase()}', {
+    left: imgWidth / 2,
+    top: imgHeight / 2,
+    width: imgWidth * 0.9, // Set a width for the text box to wrap the text
+    fontSize: 40,
+    fill: '#ffffff',
+    originX: 'center',
+    originY: 'center',
+    textAlign: 'center',
+    editable: true, // Allow text manipulation
+    hasControls: true, // Allow text controls
+    hasBorders: true,
+});
+
 
                             canvas.add(text);
 
