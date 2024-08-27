@@ -12,13 +12,17 @@ const App = () => {
 
     const handleSearch = async (query) => {
         setQuote(query);
-        const response = await axios.get('https://api.pexels.com/v1/search', {
-            params: { query, per_page: 15 },
-            headers: {
-                Authorization: 'uVktvfZdjycLoNDU8HGlu633wvCVGRKJk7kfxqXrFtBwOpxGVAYNQsbg',
-            },
-        });
-        setImages(response.data.photos);
+        try {
+            const response = await axios.get('https://api.pexels.com/v1/search', {
+                params: { query, per_page: 15 },
+                headers: {
+                    Authorization: 'uVktvfZdjycLoNDU8HGlu633wvCVGRKJk7kfxqXrFtBwOpxGVAYNQsbg',
+                },
+            });
+            setImages(response.data.photos);
+        } catch (error) {
+            console.error('Error fetching images:', error);
+        }
     };
 
     const handleGenerateRandomQuote = async () => {
@@ -36,7 +40,9 @@ const App = () => {
     };
 
     const handleImageClick = (image) => {
+        // Set the selected image and quote, so ImageModal can use them
         setSelectedImage(image);
+        setQuote(quote); // Make sure to use the correct quote
     };
 
     const handleCloseModal = () => {

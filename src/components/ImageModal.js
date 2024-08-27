@@ -1,119 +1,131 @@
-// src/components/ImageModal.js
 import React, { useEffect } from 'react';
-import { Canvas } from 'fabric';
-import { Image as FabricImage, Text as FabricText } from 'fabric';
 
 const ImageModal = ({ image, quote, onClose }) => {
     useEffect(() => {
-        const canvas = new Canvas('canvas');
+        const openImageWithTextInNewTab = () => {
+            const newWindow = window.open('', '_blank');
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Image with Text</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            background-color: #000;
+                            overflow: hidden;
+                        }
+                        canvas {
+                            border: 2px solid #fff;
+                            display: block;
+                        }
+                    </style>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+                </head>
+                <body>
+                    <canvas id="canvas"></canvas>
+                    <script>
+                        const canvas = new fabric.Canvas('canvas');
+                        fabric.Image.fromURL('${image.src.large}', (img) => {
+                            const imgWidth = img.width;
+                            const imgHeight = img.height;
 
-        console.log("Image URL:", image.src.large); // Check the URL
+                            // Set canvas size
+                            canvas.setWidth(imgWidth);
+                            canvas.setHeight(imgHeight);
 
-        FabricImage.fromURL(image.src.large, (img) => {
-            // Ensure the image is loaded
-            img.set({
-                left: 0,
-                top: 0,
-                originX: 'left',
-                originY: 'top',
-            });
+                            // Set image properties
+                            img.set({
+                                left: 0,
+                                top: 0,
+                                originX: 'left',
+                                originY: 'top',
+                                selectable: false, // Ensure image is not interactive
+                                evented: false,    // Ensure image does not respond to events
+                                hasControls: false, // Remove image controls
+                                hasBorders: false,  // Remove image borders
+                                lockMovementX: true, // Prevent movement in X direction
+                                lockMovementY: true  // Prevent movement in Y direction
+                            });
 
-            // Resize canvas to match the image dimensions
-            canvas.setWidth(img.width);
-            canvas.setHeight(img.height);
+                            canvas.add(img);
 
-            // Add image to canvas
-            canvas.add(img);
+                            const text = new fabric.Textbox('${quote}', {
+                                left: imgWidth / 2,
+                                top: imgHeight / 2,
+                                width: imgWidth * 0.9, // Set a width for the text box to wrap the text
+                                fontSize: 40,
+                                fill: '#ffffff',
+                                originX: 'center',
+                                originY: 'center',
+                                textAlign: 'center',
+                                editable: true, // Allow text manipulation
+                                hasControls: true, // Allow text controls
+                                hasBorders: true,
+                                
+                            });
 
-            // Create and add the text overlay
-            const text = new FabricText(quote.toUpperCase(), {
-                left: canvas.getWidth() / 2,
-                top: canvas.getHeight() / 2,
-                fontSize: 40,
-                fill: '#ffffff',
-                originX: 'center',
-                originY: 'center',
-                textAlign: 'center',
-                editable: true, // Allow text editing
-                hasControls: true,
-                hasBorders: true,
-            });
+                            canvas.add(text);
 
-            // Add the text to the canvas
-            canvas.add(text);
-            canvas.setActiveObject(text);
+                            // Adjust text position to ensure it is within image bounds
+                            const adjustTextPosition = () => {
+                                const textWidth = text.width;
+                                const textHeight = text.height;
 
-            // Ensure everything is rendered correctly
-            canvas.renderAll();
-        }, {
-            crossOrigin: 'anonymous', // Handle potential CORS issues
-        });
+                                text.set({
+                                    left: Math.min(Math.max(text.left, textWidth / 2), imgWidth - textWidth / 2),
+                                    top: Math.min(Math.max(text.top, textHeight / 2), imgHeight - textHeight / 2),
+                                });
+
+                                // Ensure text is contained within the image
+                                text.set({
+                                    left: Math.max(text.left, textWidth / 2),
+                                    top: Math.max(text.top, textHeight / 2),
+                                });
+
+                                canvas.renderAll();
+                            };
+
+                            adjustTextPosition();
+
+                            // Optional: Adjust fontSize to fit text within the image if needed
+                            const adjustFontSize = () => {
+                                while (text.width > imgWidth * 0.9 || text.height > imgHeight * 0.9) {
+                                    const currentFontSize = text.fontSize;
+                                    text.set({ fontSize: currentFontSize - 1 });
+                                    canvas.renderAll();
+                                }
+                            };
+
+                            adjustFontSize();
+                            canvas.setActiveObject(text);
+                        }, {
+                            crossOrigin: 'anonymous',
+                        }).catch(err => {
+                            console.error('Failed to load image:', err);
+                        });
+                    </script>
+                </body>
+                </html>
+            `;
+
+            newWindow.document.open();
+            newWindow.document.write(htmlContent);
+            newWindow.document.close();
+        };
+
+        // Open image with text in new tab when component mounts
+        openImageWithTextInNewTab();
 
         // Cleanup on component unmount
         return () => {
-            canvas.dispose();
+            // Nothing to cleanup here
         };
     }, [image, quote]);
-
-    // Function to open the image with text in a new window
-    const openImageWithTextInNewTab = () => {
-        const newWindow = window.open('', '_blank');
-
-        // Create HTML content for the new window
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Image with Text</title>
-                <style>
-                    body { margin: 0; }
-                    canvas { border: 2px solid #fff; display: block; }
-                </style>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
-            </head>
-            <body>
-                <canvas id="canvas"></canvas>
-                <script>
-                    const canvas = new fabric.Canvas('canvas');
-                    fabric.Image.fromURL('${image.src.large}', (img) => {
-                        img.set({
-                            left: 0,
-                            top: 0,
-                            originX: 'left',
-                            originY: 'top',
-                        });
-                        canvas.setWidth(img.width);
-                        canvas.setHeight(img.height);
-                        canvas.add(img);
-                        
-                        const text = new fabric.Text('${quote.toUpperCase()}', {
-                            left: canvas.getWidth() / 2,
-                            top: canvas.getHeight() / 2,
-                            fontSize: 40,
-                            fill: '#ffffff',
-                            originX: 'center',
-                            originY: 'center',
-                            textAlign: 'center',
-                            editable: true,
-                            hasControls: true,
-                            hasBorders: true,
-                        });
-
-                        canvas.add(text);
-                        canvas.setActiveObject(text);
-                        canvas.renderAll();
-                    }, {
-                        crossOrigin: 'anonymous',
-                    });
-                </script>
-            </body>
-            </html>
-        `;
-
-        newWindow.document.open();
-        newWindow.document.write(htmlContent);
-        newWindow.document.close();
-    };
 
     return (
         <div
@@ -145,15 +157,6 @@ const ImageModal = ({ image, quote, onClose }) => {
             >
                 Close
             </button>
-            <div
-                style={{
-                    border: '2px solid #fff',
-                    padding: '20px',
-                }}
-                onClick={openImageWithTextInNewTab} // Open image with text in new tab
-            >
-                <canvas id="canvas" style={{ border: '2px solid #fff', backgroundColor: '#000' }} />
-            </div>
         </div>
     );
 };
