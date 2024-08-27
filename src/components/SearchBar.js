@@ -1,7 +1,6 @@
-// src/components/SearchBar.js
 import React, { useState } from 'react';
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({ onSearch, onGenerateRandomQuote }) => {
     const [query, setQuery] = useState('');
 
     const handleSearch = () => {
@@ -19,6 +18,7 @@ const SearchBar = ({ onSearch }) => {
                 onChange={(e) => setQuery(e.target.value)}
             />
             <button onClick={handleSearch}>Search</button>
+            <button onClick={onGenerateRandomQuote}>Generate Random Quote</button>
         </div>
     );
 };

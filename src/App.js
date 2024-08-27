@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import SearchBar from './components/SearchBar';
@@ -9,6 +8,7 @@ const App = () => {
     const [images, setImages] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [quote, setQuote] = useState('');
+    const [generatedQuote, setGeneratedQuote] = useState(''); // New state for the generated quote
 
     const handleSearch = async (query) => {
         setQuote(query);
@@ -21,6 +21,20 @@ const App = () => {
         setImages(response.data.photos);
     };
 
+    const handleGenerateRandomQuote = async () => {
+        try {
+            const response = await axios.get('https://api.api-ninjas.com/v1/quotes', {
+                headers: { 'X-Api-Key': 'WIDogwrp/Kfc3ELin0zpLg==uPeHtjJU6R6Z3X0Q' }, // Replace with your API key
+            });
+            const randomQuote = response.data[0].quote; // Adjust based on API response structure
+            setGeneratedQuote(randomQuote); // Update the state with the generated quote
+            setQuote(randomQuote);
+            handleSearch(randomQuote);
+        } catch (error) {
+            console.error('Error fetching random quote:', error);
+        }
+    };
+
     const handleImageClick = (image) => {
         setSelectedImage(image);
     };
@@ -31,7 +45,15 @@ const App = () => {
 
     return (
         <div>
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar
+                onSearch={handleSearch}
+                onGenerateRandomQuote={handleGenerateRandomQuote} // Pass the function to SearchBar
+            />
+            {generatedQuote && (
+                <div style={{ margin: '10px 0', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
+                    <strong>Generated Quote:</strong> {generatedQuote}
+                </div>
+            )}
             <ImageGrid images={images} onImageClick={handleImageClick} />
             {selectedImage && (
                 <ImageModal image={selectedImage} quote={quote} onClose={handleCloseModal} />
