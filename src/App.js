@@ -57,12 +57,12 @@ const App = () => {
                     onSearch={handleSearch}
                     onGenerateRandomQuote={handleGenerateRandomQuote}
                 />
-                {generatedQuote && !selectedImage && (
+                {generatedQuote &&  (
                     <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-white shadow-md">
                         <strong className="text-lg">Generated Quote:</strong> {generatedQuote}
                     </div>
                 )}
-                {!selectedImage && <ImageGrid images={images} onImageClick={handleImageClick} />}
+                <ImageGrid images={images} onImageClick={handleImageClick} />
                 {selectedImage && (
                     <ImageModal image={selectedImage} quote={quote} onClose={handleCloseModal} />
                 )}
