@@ -7,13 +7,16 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
-  <Router>
-    <Routes>
-      <Route path="/" element={<App />} />
-      <Route path="/canvas" element={<ImageModal />} /> {/* Make sure to use ImageModal */}
-    </Routes>
-  </Router>
+  <React.StrictMode>
+    <Router>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/canvas" element={<ImageModal />} /> {/* Route for ImageModal */}
+      </Routes>
+    </Router>
+  </React.StrictMode>
 );
 
 reportWebVitals();
