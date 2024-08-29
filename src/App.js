@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SearchBar from './components/SearchBar';
 import ImageGrid from './components/ImageGrid';
@@ -9,6 +10,7 @@ const App = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [quote, setQuote] = useState('');
     const [generatedQuote, setGeneratedQuote] = useState('');
+    const navigate = useNavigate(); // Use navigate
 
     const handleSearch = async (query) => {
         setQuote(query);
@@ -40,8 +42,8 @@ const App = () => {
     };
 
     const handleImageClick = (image) => {
-        setSelectedImage(image);
-        setQuote(quote);
+        // Use navigate to go to the canvas page
+        navigate('/canvas', { state: { imageUrl: image.src.large, text: quote } });
     };
 
     const handleCloseModal = () => {
@@ -55,12 +57,12 @@ const App = () => {
                     onSearch={handleSearch}
                     onGenerateRandomQuote={handleGenerateRandomQuote}
                 />
-                {generatedQuote && (
+                {generatedQuote && !selectedImage && (
                     <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-white shadow-md">
                         <strong className="text-lg">Generated Quote:</strong> {generatedQuote}
                     </div>
                 )}
-                <ImageGrid images={images} onImageClick={handleImageClick} />
+                {!selectedImage && <ImageGrid images={images} onImageClick={handleImageClick} />}
                 {selectedImage && (
                     <ImageModal image={selectedImage} quote={quote} onClose={handleCloseModal} />
                 )}
