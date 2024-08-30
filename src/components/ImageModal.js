@@ -6,44 +6,21 @@ const ImageModal = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { imageUrl, quote } = location.state || {};
-<<<<<<< HEAD
+
+    const canvasRef = useRef(null);
 
     useEffect(() => {
-        // Check if the canvas already exists
-        const existingCanvas = document.getElementById('canvas');
-        if (existingCanvas) {
-            existingCanvas.innerHTML = ''; // Clear existing content
-        }
-
-        // Create a new canvas instance
-        const canvas = new fabric.Canvas('canvas');
-        const spinner = document.getElementById('spinner');
-        const downloadBtn = document.getElementById('downloadBtn');
-
-        const initCanvas = () => {
-            if (!imageUrl) {
-                console.error("Image URL is not provided.");
-                return;
-            }
-
-            // Ensure spinner is shown while loading
-            if (spinner) {
-                spinner.style.display = 'block';
-            }
-=======
-
-    const canvasRef = useRef(null); // Use useRef to reference the canvas
-
-    useEffect(() => {
-        const canvas = new fabric.Canvas(canvasRef.current); // Initialize canvas using ref
+        const canvas = new fabric.Canvas(canvasRef.current);
         const spinner = document.getElementById('spinner');
 
         spinner.style.display = 'block';
 
+        // Log the quote to check if it's correctly passed
+        console.log('Received quote:', quote);
+
         const imgElement = new Image();
         imgElement.crossOrigin = 'anonymous';
         imgElement.src = imageUrl;
->>>>>>> 10fe78e54990b4788ed8b0dffd459d40fc439473
 
         imgElement.onload = () => {
             const fabricImg = new fabric.Image(imgElement, {
@@ -58,79 +35,35 @@ const ImageModal = () => {
             const imgWidth = imgElement.width;
             const imgHeight = imgElement.height;
 
-<<<<<<< HEAD
-                // Hide the spinner when the image is loaded
-                if (spinner) {
-                    spinner.style.display = 'none';
-                }
-=======
             spinner.style.display = 'none';
->>>>>>> 10fe78e54990b4788ed8b0dffd459d40fc439473
 
             canvas.setWidth(imgWidth);
             canvas.setHeight(imgHeight);
 
             canvas.add(fabricImg);
 
-            if (quote) {
-                const text = new fabric.Textbox(quote.toUpperCase(), {
-                    left: imgWidth / 2,
-                    top: imgHeight / 2,
-                    width: imgWidth * 0.9,
-                    fontSize: 40,
-                    fill: '#ffffff',
-                    originX: 'center',
-                    originY: 'center',
-                    textAlign: 'center',
-                    editable: true,
-                    hasControls: true,
-                    hasBorders: true,
-                    wordWrap: true,
-                    padding: 10,
-                    cornerSize: 20,
-                });
+            // Ensure quote is used instead of default text
+            const text = new fabric.Textbox(quote?.toUpperCase() || '', {
+                left: imgWidth / 2,
+                top: imgHeight / 2,
+                width: imgWidth * 0.9,
+                fontSize: 40,
+                fill: '#ffffff',
+                originX: 'center',
+                originY: 'center',
+                textAlign: 'center',
+                editable: true,
+                hasControls: true,
+                hasBorders: true,
+                wordWrap: true,
+                padding: 10,
+                cornerSize: 20,
+            });
 
-                canvas.add(text);
-                canvas.setActiveObject(text);
-<<<<<<< HEAD
-                canvas.renderAll(); // Ensure the canvas is rendered
-
-                // Add event listener to download button if it exists
-                if (downloadBtn) {
-                    downloadBtn.addEventListener('click', () => {
-                        const dataURL = canvas.toDataURL({
-                            format: 'png',
-                            quality: 1
-                        });
-                        const link = document.createElement('a');
-                        link.href = dataURL;
-                        link.download = 'image-with-text.png';
-                        link.click();
-                    });
-                }
-            };
-
-            imgElement.onerror = (err) => {
-                console.error('Failed to load image:', err);
-                if (spinner) {
-                    spinner.style.display = 'none'; // Hide spinner on error
-                }
-            };
-        };
-
-        initCanvas();
-
-        // Cleanup function
-        return () => {
-            if (canvas) {
-                // Clear the canvas if dispose is not available
-                canvas.clear();
-                canvas.dispose(); // This will also remove event listeners
-=======
-                canvas.bringToFront(text); // Ensure the text is on top
-                canvas.renderAll(); // Ensure the canvas is re-rendered
->>>>>>> 10fe78e54990b4788ed8b0dffd459d40fc439473
-            }
+            canvas.add(text);
+            canvas.setActiveObject(text);
+            canvas.bringToFront(text);
+            canvas.renderAll();
         };
 
         imgElement.onerror = (err) => {
@@ -139,7 +72,7 @@ const ImageModal = () => {
         };
 
         return () => {
-            canvas.dispose(); // Cleanup canvas on component unmount
+            canvas.dispose();
         };
     }, [imageUrl, quote]);
 

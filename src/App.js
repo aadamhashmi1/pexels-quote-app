@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SearchBar from './components/SearchBar';
 import ImageGrid from './components/ImageGrid';
-import ImageModal from './components/ImageModal';
 
 const App = () => {
     const [images, setImages] = useState([]);
-    const [selectedImage, setSelectedImage] = useState(null);
     const [quote, setQuote] = useState('');
     const [generatedQuote, setGeneratedQuote] = useState('');
     const navigate = useNavigate(); // Use navigate
@@ -42,12 +40,8 @@ const App = () => {
     };
 
     const handleImageClick = (image) => {
-        // Use navigate to go to the canvas page
-        navigate('/canvas', { state: { imageUrl: image.src.large, text: quote } });
-    };
-
-    const handleCloseModal = () => {
-        setSelectedImage(null);
+        // Navigate to the ImageModal component with the selected image and quote
+        navigate('/canvas', { state: { imageUrl: image.src.large, quote } });
     };
 
     return (
@@ -57,15 +51,12 @@ const App = () => {
                     onSearch={handleSearch}
                     onGenerateRandomQuote={handleGenerateRandomQuote}
                 />
-                {generatedQuote &&  (
+                {generatedQuote && (
                     <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-white shadow-md">
                         <strong className="text-lg">Generated Quote:</strong> {generatedQuote}
                     </div>
                 )}
                 <ImageGrid images={images} onImageClick={handleImageClick} />
-                {selectedImage && (
-                    <ImageModal image={selectedImage} quote={quote} onClose={handleCloseModal} />
-                )}
             </div>
         </div>
     );

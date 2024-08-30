@@ -1,4 +1,3 @@
-// ImageGrid.js
 import React from 'react';
 
 const ImageGrid = ({ images, onImageClick }) => {
