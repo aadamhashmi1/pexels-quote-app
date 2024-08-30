@@ -8,8 +8,18 @@ const ImageModal = () => {
     const { imageUrl, quote } = location.state || {};
     
     const canvasRef = useRef(null);
-    const [canvas, setCanvas] = useState(null); // State to keep track of the Fabric.js canvas instance
-    const [textObject, setTextObject] = useState(null); // State to keep track of the text object
+    const [canvas, setCanvas] = useState(null);
+    const [textObject, setTextObject] = useState(null);
+    const [fontIndex, setFontIndex] = useState(0);
+
+    const fonts = [
+        'Arial',
+        'Verdana',
+        'Georgia',
+        'Times New Roman',
+        'Courier New',
+        'Comic Sans MS'
+    ];
 
     useEffect(() => {
         const fabricCanvas = new fabric.Canvas(canvasRef.current);
@@ -63,8 +73,8 @@ const ImageModal = () => {
             }
 
             const brightness = Math.floor(colorSum / (imgWidth * imgHeight));
-
             const textColor = brightness > 128 ? '#000000' : '#FFFFFF';
+
             const text = new fabric.Textbox(quote?.toUpperCase() || '', {
                 left: imgWidth / 2,
                 top: imgHeight / 2,
@@ -80,6 +90,7 @@ const ImageModal = () => {
                 wordWrap: true,
                 padding: 10,
                 cornerSize: 20,
+                fontFamily: fonts[fontIndex] // Set initial font
             });
 
             fabricCanvas.add(text);
@@ -90,7 +101,7 @@ const ImageModal = () => {
                 text.bringToFront();
             }
             
-            setTextObject(text); // Save the text object in state
+            setTextObject(text);
         };
 
         imgElement.onerror = (err) => {
@@ -101,7 +112,7 @@ const ImageModal = () => {
         return () => {
             fabricCanvas.dispose();
         };
-    }, [imageUrl, quote]);
+    }, [imageUrl, quote, fontIndex]);
 
     const handleClose = () => {
         navigate('/');
@@ -133,7 +144,18 @@ const ImageModal = () => {
         if (textObject && canvas) {
             const newColor = getRandomColor();
             textObject.set('fill', newColor);
-            canvas.renderAll(); // Call renderAll on the Fabric.js canvas instance
+            canvas.renderAll();
+        }
+    };
+
+    const handleChangeFont = () => {
+        if (textObject && canvas) {
+            const nextFontIndex = (fontIndex + 1) % fonts.length;
+            const newFont = fonts[nextFontIndex];
+            
+            textObject.set('fontFamily', newFont);
+            setFontIndex(nextFontIndex); // Update the current font index
+            canvas.renderAll();
         }
     };
 
@@ -158,6 +180,12 @@ const ImageModal = () => {
                 onClick={handleChangeColor}
             >
                 Change Color
+            </button>
+            <button
+                className="absolute bottom-24 right-4 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
+                onClick={handleChangeFont}
+            >
+                Change Font
             </button>
         </div>
     );
