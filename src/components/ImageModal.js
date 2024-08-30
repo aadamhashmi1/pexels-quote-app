@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
 
@@ -10,16 +10,19 @@ const ImageModal = () => {
     const canvasRef = useRef(null);
     const [canvas, setCanvas] = useState(null);
     const [textObject, setTextObject] = useState(null);
-    const [fontIndex, setFontIndex] = useState(0);
+    const [fontIndex, setFontIndex] = useState(0); // State to keep track of the current font index
 
-    const fonts = [
+    // Memoize the fonts array to prevent unnecessary re-renders
+    const fonts = useMemo(() => [
         'Arial',
         'Verdana',
+        'Courier New',
         'Georgia',
         'Times New Roman',
-        'Courier New',
-        'Comic Sans MS'
-    ];
+        'Comic Sans MS',
+        'Trebuchet MS',
+        'Helvetica',
+    ], []);
 
     useEffect(() => {
         const fabricCanvas = new fabric.Canvas(canvasRef.current);
@@ -74,7 +77,6 @@ const ImageModal = () => {
 
             const brightness = Math.floor(colorSum / (imgWidth * imgHeight));
             const textColor = brightness > 128 ? '#000000' : '#FFFFFF';
-
             const text = new fabric.Textbox(quote?.toUpperCase() || '', {
                 left: imgWidth / 2,
                 top: imgHeight / 2,
@@ -112,7 +114,7 @@ const ImageModal = () => {
         return () => {
             fabricCanvas.dispose();
         };
-    }, [imageUrl, quote, fontIndex]);
+    }, [imageUrl, quote, fontIndex, fonts]); // Added fonts and fontIndex to the dependency array
 
     const handleClose = () => {
         navigate('/');
@@ -150,11 +152,9 @@ const ImageModal = () => {
 
     const handleChangeFont = () => {
         if (textObject && canvas) {
-            const nextFontIndex = (fontIndex + 1) % fonts.length;
-            const newFont = fonts[nextFontIndex];
-            
-            textObject.set('fontFamily', newFont);
-            setFontIndex(nextFontIndex); // Update the current font index
+            const newFontIndex = (fontIndex + 1) % fonts.length;
+            textObject.set('fontFamily', fonts[newFontIndex]);
+            setFontIndex(newFontIndex);
             canvas.renderAll();
         }
     };
@@ -182,7 +182,7 @@ const ImageModal = () => {
                 Change Color
             </button>
             <button
-                className="absolute bottom-24 right-4 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
+                className="absolute bottom-24 right-24 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
                 onClick={handleChangeFont}
             >
                 Change Font
