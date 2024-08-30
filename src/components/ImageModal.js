@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
 
@@ -6,17 +6,17 @@ const ImageModal = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { imageUrl, quote } = location.state || {};
-
+    
     const canvasRef = useRef(null);
+    const [canvas, setCanvas] = useState(null); // State to keep track of the Fabric.js canvas instance
+    const [textObject, setTextObject] = useState(null); // State to keep track of the text object
 
     useEffect(() => {
-        const canvas = new fabric.Canvas(canvasRef.current);
+        const fabricCanvas = new fabric.Canvas(canvasRef.current);
+        setCanvas(fabricCanvas);
+        
         const spinner = document.getElementById('spinner');
-
         spinner.style.display = 'block';
-
-        // Log the quote to check if it's correctly passed
-        console.log('Received quote:', quote);
 
         const imgElement = new Image();
         imgElement.crossOrigin = 'anonymous';
@@ -38,15 +38,14 @@ const ImageModal = () => {
             spinner.style.display = 'none';
 
             if (imgWidth && imgHeight) {
-                // Use setDimensions to set both width and height
-                canvas.setDimensions({
+                fabricCanvas.setDimensions({
                     width: imgWidth,
                     height: imgHeight,
                 });
-                canvas.add(fabricImg);
+                fabricCanvas.add(fabricImg);
             }
         
-            const context = canvas.getContext('2d');
+            const context = fabricCanvas.getContext('2d');
             context.drawImage(imgElement, 0, 0, imgWidth, imgHeight);
             const imageData = context.getImageData(0, 0, imgWidth, imgHeight);
             const data = imageData.data;
@@ -65,16 +64,13 @@ const ImageModal = () => {
 
             const brightness = Math.floor(colorSum / (imgWidth * imgHeight));
 
-            // Set text color based on brightness
             const textColor = brightness > 128 ? '#000000' : '#FFFFFF';
-            // Ensure quote is used instead of default text
             const text = new fabric.Textbox(quote?.toUpperCase() || '', {
                 left: imgWidth / 2,
                 top: imgHeight / 2,
                 width: imgWidth * 0.9,
                 fontSize: 40,
                 fill: textColor,
-                
                 originX: 'center',
                 originY: 'center',
                 textAlign: 'center',
@@ -86,14 +82,15 @@ const ImageModal = () => {
                 cornerSize: 20,
             });
 
-            canvas.add(text);
-            canvas.setActiveObject(text);
-            canvas.renderAll();
-
+            fabricCanvas.add(text);
+            fabricCanvas.setActiveObject(text);
+            fabricCanvas.renderAll();
+            
             if (typeof text.bringToFront === 'function') {
                 text.bringToFront();
             }
-        
+            
+            setTextObject(text); // Save the text object in state
         };
 
         imgElement.onerror = (err) => {
@@ -102,7 +99,7 @@ const ImageModal = () => {
         };
 
         return () => {
-            canvas.dispose();
+            fabricCanvas.dispose();
         };
     }, [imageUrl, quote]);
 
@@ -111,8 +108,8 @@ const ImageModal = () => {
     };
 
     const handleDownload = () => {
-        if (canvasRef.current) {
-            const dataURL = canvasRef.current.toDataURL({
+        if (canvas) {
+            const dataURL = canvas.toDataURL({
                 format: 'png',
                 quality: 1,
             });
@@ -120,6 +117,23 @@ const ImageModal = () => {
             link.href = dataURL;
             link.download = 'image-with-text.png';
             link.click();
+        }
+    };
+
+    const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    };
+
+    const handleChangeColor = () => {
+        if (textObject && canvas) {
+            const newColor = getRandomColor();
+            textObject.set('fill', newColor);
+            canvas.renderAll(); // Call renderAll on the Fabric.js canvas instance
         }
     };
 
@@ -134,10 +148,16 @@ const ImageModal = () => {
             <canvas ref={canvasRef} className="border-2 border-white"></canvas>
             <div className="spinner" id="spinner">Loading...</div>
             <button
-                className="absolute bottom-4 right-4 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
+                className="absolute bottom-4 right-16 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
                 onClick={handleDownload}
             >
                 Download
+            </button>
+            <button
+                className="absolute bottom-16 right-14 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
+                onClick={handleChangeColor}
+            >
+                Change Color
             </button>
         </div>
     );
