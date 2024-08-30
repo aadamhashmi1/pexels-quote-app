@@ -37,10 +37,15 @@ const ImageModal = () => {
 
             spinner.style.display = 'none';
 
-            canvas.setWidth(imgWidth);
-            canvas.setHeight(imgHeight);
-
-            canvas.add(fabricImg);
+            if (imgWidth && imgHeight) {
+                // Use setDimensions to set both width and height
+                canvas.setDimensions({
+                    width: imgWidth,
+                    height: imgHeight,
+                });
+                canvas.add(fabricImg);
+            }
+        
 
             // Ensure quote is used instead of default text
             const text = new fabric.Textbox(quote?.toUpperCase() || '', {
@@ -62,8 +67,12 @@ const ImageModal = () => {
 
             canvas.add(text);
             canvas.setActiveObject(text);
-            canvas.bringToFront(text);
             canvas.renderAll();
+
+            if (typeof text.bringToFront === 'function') {
+                text.bringToFront();
+            }
+        
         };
 
         imgElement.onerror = (err) => {
