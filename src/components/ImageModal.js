@@ -46,14 +46,35 @@ const ImageModal = () => {
                 canvas.add(fabricImg);
             }
         
+            const context = canvas.getContext('2d');
+            context.drawImage(imgElement, 0, 0, imgWidth, imgHeight);
+            const imageData = context.getImageData(0, 0, imgWidth, imgHeight);
+            const data = imageData.data;
 
+            let r, g, b, avg;
+            let colorSum = 0;
+
+            for (let x = 0, len = data.length; x < len; x += 4) {
+                r = data[x];
+                g = data[x + 1];
+                b = data[x + 2];
+
+                avg = Math.floor((r + g + b) / 3);
+                colorSum += avg;
+            }
+
+            const brightness = Math.floor(colorSum / (imgWidth * imgHeight));
+
+            // Set text color based on brightness
+            const textColor = brightness > 128 ? '#000000' : '#FFFFFF';
             // Ensure quote is used instead of default text
             const text = new fabric.Textbox(quote?.toUpperCase() || '', {
                 left: imgWidth / 2,
                 top: imgHeight / 2,
                 width: imgWidth * 0.9,
                 fontSize: 40,
-                fill: '#ffffff',
+                fill: textColor,
+                
                 originX: 'center',
                 originY: 'center',
                 textAlign: 'center',
