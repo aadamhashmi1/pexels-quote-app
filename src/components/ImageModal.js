@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
 
@@ -6,6 +6,7 @@ const ImageModal = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { imageUrl, quote } = location.state || {};
+<<<<<<< HEAD
 
     useEffect(() => {
         // Check if the canvas already exists
@@ -29,41 +30,50 @@ const ImageModal = () => {
             if (spinner) {
                 spinner.style.display = 'block';
             }
+=======
 
-            // Create a new image element
-            const imgElement = new Image();
-            imgElement.crossOrigin = 'anonymous'; // Handle cross-origin images
-            imgElement.src = imageUrl;
-            imgElement.onload = () => {
-                const fabricImg = new fabric.Image(imgElement, {
-                    left: 0,
-                    top: 0,
-                    originX: 'left',
-                    originY: 'top',
-                    selectable: false,
-                    evented: false,
-                    hasControls: false,
-                    hasBorders: false,
-                    lockMovementX: true,
-                    lockMovementY: true
-                });
+    const canvasRef = useRef(null); // Use useRef to reference the canvas
 
-                const imgWidth = imgElement.width;
-                const imgHeight = imgElement.height;
+    useEffect(() => {
+        const canvas = new fabric.Canvas(canvasRef.current); // Initialize canvas using ref
+        const spinner = document.getElementById('spinner');
 
+        spinner.style.display = 'block';
+
+        const imgElement = new Image();
+        imgElement.crossOrigin = 'anonymous';
+        imgElement.src = imageUrl;
+>>>>>>> 10fe78e54990b4788ed8b0dffd459d40fc439473
+
+        imgElement.onload = () => {
+            const fabricImg = new fabric.Image(imgElement, {
+                left: 0,
+                top: 0,
+                originX: 'left',
+                originY: 'top',
+                selectable: false,
+                evented: false,
+            });
+
+            const imgWidth = imgElement.width;
+            const imgHeight = imgElement.height;
+
+<<<<<<< HEAD
                 // Hide the spinner when the image is loaded
                 if (spinner) {
                     spinner.style.display = 'none';
                 }
+=======
+            spinner.style.display = 'none';
+>>>>>>> 10fe78e54990b4788ed8b0dffd459d40fc439473
 
-                // Set canvas size
-                canvas.setWidth(imgWidth);
-                canvas.setHeight(imgHeight);
+            canvas.setWidth(imgWidth);
+            canvas.setHeight(imgHeight);
 
-                canvas.add(fabricImg);
+            canvas.add(fabricImg);
 
-                // Add text to canvas
-                const text = new fabric.Textbox(quote || 'Your Text Here', {
+            if (quote) {
+                const text = new fabric.Textbox(quote.toUpperCase(), {
                     left: imgWidth / 2,
                     top: imgHeight / 2,
                     width: imgWidth * 0.9,
@@ -75,10 +85,14 @@ const ImageModal = () => {
                     editable: true,
                     hasControls: true,
                     hasBorders: true,
+                    wordWrap: true,
+                    padding: 10,
+                    cornerSize: 20,
                 });
 
                 canvas.add(text);
                 canvas.setActiveObject(text);
+<<<<<<< HEAD
                 canvas.renderAll(); // Ensure the canvas is rendered
 
                 // Add event listener to download button if it exists
@@ -112,13 +126,38 @@ const ImageModal = () => {
                 // Clear the canvas if dispose is not available
                 canvas.clear();
                 canvas.dispose(); // This will also remove event listeners
+=======
+                canvas.bringToFront(text); // Ensure the text is on top
+                canvas.renderAll(); // Ensure the canvas is re-rendered
+>>>>>>> 10fe78e54990b4788ed8b0dffd459d40fc439473
             }
         };
 
+        imgElement.onerror = (err) => {
+            console.error('Failed to load image:', err);
+            spinner.style.display = 'none';
+        };
+
+        return () => {
+            canvas.dispose(); // Cleanup canvas on component unmount
+        };
     }, [imageUrl, quote]);
 
     const handleClose = () => {
         navigate('/');
+    };
+
+    const handleDownload = () => {
+        if (canvasRef.current) {
+            const dataURL = canvasRef.current.toDataURL({
+                format: 'png',
+                quality: 1,
+            });
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'image-with-text.png';
+            link.click();
+        }
     };
 
     return (
@@ -129,9 +168,12 @@ const ImageModal = () => {
             >
                 Close
             </button>
-            <canvas id="canvas" className="border-2 border-white"></canvas>
+            <canvas ref={canvasRef} className="border-2 border-white"></canvas>
             <div className="spinner" id="spinner">Loading...</div>
-            <button id="downloadBtn" className="absolute bottom-4 right-4 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded">
+            <button
+                className="absolute bottom-4 right-4 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
+                onClick={handleDownload}
+            >
                 Download
             </button>
         </div>
