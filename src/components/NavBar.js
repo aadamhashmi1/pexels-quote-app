@@ -7,7 +7,9 @@ const NavBar = () => {
         <nav className="bg-blue-500 p-4">
             <div className="container mx-auto flex justify-between items-center">
                 <Link to="/" className="text-white text-lg font-bold">Quote App</Link>
-                <button className="bg-white text-blue-500 px-4 py-2 rounded">Button</button>
+                <Link to="/project">
+                    <button className="bg-white text-blue-500 px-4 py-2 rounded">Go to Project</button>
+                </Link>
             </div>
         </nav>
     );
