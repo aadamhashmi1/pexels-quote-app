@@ -1,14 +1,16 @@
+// App.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SearchBar from './components/SearchBar';
 import ImageGrid from './components/ImageGrid';
+import NavBar from './components/NavBar'; // Import NavBar
 
 const App = () => {
     const [images, setImages] = useState([]);
     const [quote, setQuote] = useState('');
     const [generatedQuote, setGeneratedQuote] = useState('');
-    const navigate = useNavigate(); // Use navigate
+    const navigate = useNavigate();
 
     const handleSearch = async (query) => {
         setQuote(query);
@@ -40,12 +42,12 @@ const App = () => {
     };
 
     const handleImageClick = (image) => {
-        // Navigate to the ImageModal component with the selected image and quote
         navigate('/canvas', { state: { imageUrl: image.src.large, quote } });
     };
 
     return (
         <div className="min-h-screen bg-gray-100">
+            <NavBar /> {/* Add NavBar here */}
             <div className="container mx-auto p-4">
                 <SearchBar
                     onSearch={handleSearch}
