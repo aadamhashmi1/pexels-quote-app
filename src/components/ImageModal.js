@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
+import Toolbar from './Toolbar.js'; // Import the Toolbar component
 
 const ImageModal = () => {
     const location = useLocation();
@@ -10,21 +11,19 @@ const ImageModal = () => {
     const canvasRef = useRef(null);
     const [canvas, setCanvas] = useState(null);
     const [textObject, setTextObject] = useState(null);
-    const [fontIndex, setFontIndex] = useState(0); // State to keep track of the current font index
+    const [fontIndex, setFontIndex] = useState(0);
 
-    // Memoize the fonts array to prevent unnecessary re-renders
     const fonts = useMemo(() => [
-        'Arial',
-        'Verdana',
-        'Courier New',
-        'Georgia',
-        'Times New Roman',
-        'Comic Sans MS',
-        'Trebuchet MS',
-        'Helvetica',
+        'Arial', 'Verdana', 'Courier New', 'Georgia', 'Times New Roman', 'Comic Sans MS', 'Trebuchet MS', 'Helvetica',
+        'Impact', 'Lucida Console', 'Tahoma', 'Palatino', 'Garamond', 'Bookman', 'Arial Black', 'Avant Garde', 'Calibri',
+        'Candara', 'Century Gothic', 'Consolas', 'Franklin Gothic', 'Futura', 'Gill Sans', 'Goudy Old Style', 'Harrington',
+        'Lucida Bright', 'Lucida Sans', 'Optima', 'Perpetua', 'Rockwell', 'Segoe UI', 'Sylfaen', 'Tahoma', 'Trebuchet MS',
+        'Verdana', 'Zapfino'
     ], []);
 
     useEffect(() => {
+        console.log('Initializing canvas...');
+
         const fabricCanvas = new fabric.Canvas(canvasRef.current);
         setCanvas(fabricCanvas);
         
@@ -150,43 +149,50 @@ const ImageModal = () => {
         }
     };
 
-    const handleChangeFont = () => {
+    const handleChangeFont = (font) => {
         if (textObject && canvas) {
-            const newFontIndex = (fontIndex + 1) % fonts.length;
-            textObject.set('fontFamily', fonts[newFontIndex]);
-            setFontIndex(newFontIndex);
+            textObject.set('fontFamily', font);
             canvas.renderAll();
         }
     };
 
     return (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center overflow-auto">
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex flex-col items-center justify-center overflow-auto">
             <button
                 onClick={handleClose}
                 className="absolute top-4 right-4 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
             >
                 Close
             </button>
-            <canvas ref={canvasRef} className="border-2 border-white"></canvas>
+            <Toolbar
+                onBold={() => textObject.set('fontWeight', 'bold')}
+                onItalic={() => textObject.set('fontStyle', 'italic')}
+                onUnderline={() => textObject.set('textDecoration', 'underline')}
+                onStrikethrough={() => textObject.set('textDecoration', 'line-through')}
+                onTextColor={handleChangeColor}
+                onHighlightColor={handleChangeColor}
+                onLink={() => {}}
+                onComment={() => {}}
+                onAlignLeft={() => textObject.set('textAlign', 'left')}
+                onNumberedList={() => {}}
+                onBulletedList={() => {}}
+                onIndent={() => {}}
+                onEquation={() => {}}
+                onOptimize={() => {}}
+                onRedo={() => {}}
+                onFontChange={handleChangeFont}
+            />
+            <canvas ref={canvasRef} className="border-2 border-white mt-16 mx-auto"></canvas>
             <div className="spinner" id="spinner">Loading...</div>
-            <button
-                className="absolute bottom-4 right-16 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
-                onClick={handleDownload}
-            >
-                Download
-            </button>
-            <button
-                className="absolute bottom-16 right-14 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
-                onClick={handleChangeColor}
-            >
-                Change Color
-            </button>
-            <button
-                className="absolute bottom-24 right-24 bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
-                onClick={handleChangeFont}
-            >
-                Change Font
-            </button>
+            <div className="absolute bottom-4 flex gap-4">
+                <button
+                    className="bg-white border-none px-4 py-2 cursor-pointer z-10 rounded"
+                    onClick={handleDownload}
+                >
+                    Download
+                </button>
+               
+            </div>
         </div>
     );
 };
